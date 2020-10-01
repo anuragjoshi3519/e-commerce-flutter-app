@@ -1,16 +1,17 @@
-# shop_app
+# Shopp'In
 
-A new Flutter project.
+E-comm android application made using flutter with all the basic features & functionalities of any e-commerce based app.
 
-## Getting Started
+## Included features:
 
-This project is a starting point for a Flutter application.
+- Login & Signup (using firestore)
+- Add own products to sell
+- Manage own products (change price, title, description, picture etc)
+- Search & explore products
+- Add & remove products from cart
+- Place orders from the cart screen
+- Set favorite products
+- See previous orders
+- Error handling (alert boxes, snacker bars etc to keep user updated with any error if occurs)
+- Realtime data CRUD using Firebase Realtime Database and Firestore
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
