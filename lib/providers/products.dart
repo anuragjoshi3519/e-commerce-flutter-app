@@ -42,7 +42,7 @@ class Products with ChangeNotifier {
   Future<void> fetchProducts() async {
     try {
       final response = await http.get(
-          '${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/products.json');
+          '${FlutterConfig.get("FIREBASE_REALTIME_DB_URL")}/products.json');
       final loadedProducts = json.decode(response.body) as Map<String, dynamic>;
       final List<Product> prods = [];
       if (loadedProducts != null) {
@@ -71,7 +71,7 @@ class Products with ChangeNotifier {
   Future<void> addProduct(Product product) async {
     try {
       final response = await http.post(
-          '${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/products.json',
+          '${FlutterConfig.get("FIREBASE_REALTIME_DB_URL")}/products.json',
           body: json.encode({
             'title': product.title,
             'price': product.price,
