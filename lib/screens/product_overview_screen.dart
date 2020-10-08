@@ -20,49 +20,15 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   bool _showFavorite = false;
-  bool _showLoader = false;
+  Future _productsFuture;
 
-  void loadProducts() {
-    Provider.of<Products>(context, listen: false)
-        .fetchProducts()
-        .catchError((_) {
-      showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-                title: const Text("Error in loading products"),
-                content: const Text("Please try again."),
-                actions: [
-                  FlatButton(
-                    child: const Text("Exit"),
-                    onPressed: () {
-                      SystemNavigator.pop();
-                    },
-                  ),
-                  FlatButton(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      Navigator.pushReplacementNamed(
-                          context, ProductsOverviewScreen.routeName);
-                    },
-                    child: const Text("Retry"),
-                  )
-                ],
-              ));
-    }).then((_) {
-      setState(() {
-        _showLoader = false;
-      });
-    });
+  Future _loadProducts() {
+    return Provider.of<Products>(context, listen: false).fetchProducts();
   }
 
   @override
   void initState() {
-    setState(() {
-      _showLoader = true;
-    });
-    Future.delayed(Duration.zero, () {
-      loadProducts();
-    });
+    _productsFuture = _loadProducts();
     super.initState();
   }
 
@@ -126,16 +92,46 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                     ])
           ],
         ),
-        body: _showLoader
-            ? Center(
-                child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  CircularProgressIndicator(),
-                  Text("Loading products...")
-                ],
-              ))
-            : ProductsGrid(showFavs: _showFavorite),
+        body: FutureBuilder(
+            future: _productsFuture,
+            builder: (ctx, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    CircularProgressIndicator(),
+                    Text("Loading products...")
+                  ],
+                ));
+              } else {
+                if (snapshot.error != null) {
+                  return AlertDialog(
+                    title: const Text("Error in loading products"),
+                    content: const Text("Please try again."),
+                    actions: [
+                      FlatButton(
+                        child: const Text("Exit"),
+                        onPressed: () {
+                          SystemNavigator.pop();
+                        },
+                      ),
+                      FlatButton(
+                        onPressed: () {
+                          setState(() {
+                            _productsFuture = _loadProducts();
+                          });
+                        },
+                        child: const Text("Retry"),
+                      )
+                    ],
+                  );
+                }
+                return RefreshIndicator(
+                    onRefresh: _loadProducts,
+                    child: ProductsGrid(showFavs: _showFavorite));
+              }
+            }),
       ),
     );
   }
@@ -149,8 +145,9 @@ class ProductsGrid extends StatelessWidget {
     final List<Product> loadedProducts = !showFavs
         ? Provider.of<Products>(context).items
         : Provider.of<Products>(context).favoriteItems;
-    return showFavs == false
-        ? loadedProducts.isNotEmpty? GridView.builder(
+
+    return loadedProducts.isNotEmpty
+        ? GridView.builder(
             padding: const EdgeInsets.all(10),
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 300,
@@ -162,21 +159,21 @@ class ProductsGrid extends StatelessWidget {
               value: loadedProducts[index],
               child: ProductItem(),
             ),
-          ):const Center(
-            child: Text(
-              "Sorry! There is no product available right now.",
-              style: TextStyle(
-                fontSize: 18,
-              ),
-            ),
           )
-        : const Center(
-            child: Text(
-              "You have no favorites.",
-              style: TextStyle(
-                fontSize: 18,
-              ),
-            ),
+        : Center(
+            child: !showFavs
+                ? const Text(
+                    "Sorry! There is no product available right now.",
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                  )
+                : const Text(
+                    "You have no favorites.",
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
           );
   }
 }

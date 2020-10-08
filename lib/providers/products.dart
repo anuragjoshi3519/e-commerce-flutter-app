@@ -54,9 +54,9 @@ class Products with ChangeNotifier {
                   id: prodID,
                   title: prodData['title'],
                   description: prodData['description'],
-                  price: prodData['price'],
+                  price: prodData['price'] as double,
                   imageUrl: prodData['imageUrl'],
-                  isFavorite: prodData['isFavorite']),
+                  isFavorite: prodData['isFavorite'] as bool),
             );
           },
         );

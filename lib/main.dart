@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_config/flutter_config.dart';
 
 import './providers/cart.dart';
 import './providers/order.dart';
 import './providers/products.dart';
+import './screens/auth_screen.dart';
 import './screens/cart_screen.dart';
 import './screens/edit_product.dart';
 import './screens/manage_product_screen.dart';
@@ -12,9 +14,10 @@ import './screens/order_screen.dart';
 import './screens/product_overview_screen.dart';
 import 'screens/product_detail_screen.dart';
 
-Future<void> main() async{
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FlutterConfig.loadEnvVariables();
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(MyApp());
 }
 
@@ -42,7 +45,7 @@ class MyApp extends StatelessWidget {
             visualDensity: VisualDensity.adaptivePlatformDensity,
             fontFamily: 'Lato',
             textTheme: Typography.blackMountainView),
-        initialRoute: ProductsOverviewScreen.routeName,
+        initialRoute: AuthScreen.routeName,
         routes: {
           ProductsOverviewScreen.routeName: (ctx) => ProductsOverviewScreen(),
           ProductDetails.routeName: (ctx) => ProductDetails(),
@@ -50,6 +53,7 @@ class MyApp extends StatelessWidget {
           OrderScreen.routeName: (ctx) => OrderScreen(),
           ManageProductScreen.routeName: (ctx) => ManageProductScreen(),
           EditProduct.routeName: (ctx) => EditProduct(),
+          AuthScreen.routeName: (ctx) => AuthScreen(),
         },
       ),
     );

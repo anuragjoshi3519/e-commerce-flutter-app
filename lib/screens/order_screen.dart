@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/order.dart' show Order;
 import '../widgets/order_item.dart';
+import './product_overview_screen.dart';
 import 'main_drawer.dart';
 
 class OrderScreen extends StatefulWidget {
@@ -13,55 +14,21 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
-  bool _showLoader = false;
+  Future _orderFuture;
 
-  Future<void> loadOrders() async {
-    try {
-      await Provider.of<Order>(context, listen: false).fetchOrders();
-    } catch (_) {
-      showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-                title: const Text("Error"),
-                content: const Text("Can't load orders. Please try again."),
-                actions: [
-                  FlatButton(
-                    child: const Text("Close"),
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                    },
-                  ),
-                  FlatButton(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      Navigator.pushReplacementNamed(
-                          context, OrderScreen.routeName);
-                    },
-                    child: const Text("Retry"),
-                  )
-                ],
-              ));
-    } finally {
-      setState(() {
-        _showLoader = false;
-      });
-    }
+  Future _loadOrders() {
+    return Provider.of<Order>(context, listen: false).fetchOrders();
   }
 
   @override
   void initState() {
-    setState(() {
-      _showLoader = true;
-    });
-    Future.delayed(Duration.zero, () {
-      loadOrders();
-    });
+    _orderFuture = _loadOrders();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final Order orders = Provider.of<Order>(context, listen: false);
+    final Order orders = Provider.of<Order>(context);
     return SafeArea(
       child: Scaffold(
         drawer: MainDrawer(),
@@ -73,9 +40,44 @@ class _OrderScreenState extends State<OrderScreen> {
               .headline6
               .copyWith(color: Colors.white),
         )),
-        body: !_showLoader
-            ? RefreshIndicator(
-                onRefresh: loadOrders,
+        body: FutureBuilder(
+          future: _orderFuture,
+          builder: (ctx, orderSnapshot) {
+            if (orderSnapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  CircularProgressIndicator(),
+                  Text("Loading orders...")
+                ],
+              ));
+            } else {
+              if (orderSnapshot.hasError) {
+                return AlertDialog(
+                  title: const Text("Error"),
+                  content: const Text("Can't load orders. Please try again."),
+                  actions: [
+                    FlatButton(
+                      child: const Text("Close"),
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(
+                            context, ProductsOverviewScreen.routeName);
+                      },
+                    ),
+                    FlatButton(
+                      onPressed: () {
+                        setState(() {
+                          _orderFuture = _loadOrders();
+                        });
+                      },
+                      child: const Text("Retry"),
+                    )
+                  ],
+                );
+              }
+              return RefreshIndicator(
+                onRefresh: _loadOrders,
                 child: orders.orderItems.isEmpty
                     ? const Center(
                         child: Text(
@@ -93,15 +95,10 @@ class _OrderScreenState extends State<OrderScreen> {
                                 OrderItem(order: orders.orderItems[index]),
                             itemCount: orders.orderItems.length),
                       ),
-              )
-            : Center(
-                child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  CircularProgressIndicator(),
-                  Text("Loading orders...")
-                ],
-              )),
+              );
+            }
+          },
+        ),
       ),
     );
   }
