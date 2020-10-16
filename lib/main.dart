@@ -50,9 +50,9 @@ class MyApp extends StatelessWidget {
               visualDensity: VisualDensity.adaptivePlatformDensity,
               fontFamily: 'Lato',
               textTheme: Typography.blackMountainView),
-          initialRoute: auth.isAuthenticated
-              ? ProductsOverviewScreen.routeName
-              : AuthScreen.routeName,
+          home: auth.isAuthenticated
+              ? ProductsOverviewScreen()
+              : AuthScreen(),
           routes: {
             ProductsOverviewScreen.routeName: (ctx) => ProductsOverviewScreen(),
             ProductDetails.routeName: (ctx) => ProductDetails(),
