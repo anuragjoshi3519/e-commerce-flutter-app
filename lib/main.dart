@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_config/flutter_config.dart';
 
+import './providers/auth.dart';
 import './providers/cart.dart';
 import './providers/order.dart';
 import './providers/products.dart';
@@ -26,6 +27,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider<Auth>(
+          create: (ctx) => Auth(),
+        ),
         ChangeNotifierProvider<Products>(
           create: (ctx) => Products(),
         ),
@@ -36,42 +40,30 @@ class MyApp extends StatelessWidget {
           create: (ctx) => Order(),
         ),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
-        theme: ThemeData(
-            primarySwatch: Colors.teal,
-            accentColor: Colors.blueGrey,
-            visualDensity: VisualDensity.adaptivePlatformDensity,
-            fontFamily: 'Lato',
-            textTheme: Typography.blackMountainView),
-        initialRoute: AuthScreen.routeName,
-        routes: {
-          ProductsOverviewScreen.routeName: (ctx) => ProductsOverviewScreen(),
-          ProductDetails.routeName: (ctx) => ProductDetails(),
-          CartScreen.routeName: (ctx) => CartScreen(),
-          OrderScreen.routeName: (ctx) => OrderScreen(),
-          ManageProductScreen.routeName: (ctx) => ManageProductScreen(),
-          EditProduct.routeName: (ctx) => EditProduct(),
-          AuthScreen.routeName: (ctx) => AuthScreen(),
-        },
-      ),
-    );
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({this.title});
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-          appBar: AppBar(
-            title: Text(title),
-          ),
-          body: const Center(child: Text('Home'))),
+      child: Consumer<Auth>(builder: (ctx, auth, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Flutter Demo',
+          theme: ThemeData(
+              primarySwatch: Colors.teal,
+              accentColor: Colors.blueGrey,
+              visualDensity: VisualDensity.adaptivePlatformDensity,
+              fontFamily: 'Lato',
+              textTheme: Typography.blackMountainView),
+          initialRoute: auth.isAuthenticated
+              ? ProductsOverviewScreen.routeName
+              : AuthScreen.routeName,
+          routes: {
+            ProductsOverviewScreen.routeName: (ctx) => ProductsOverviewScreen(),
+            ProductDetails.routeName: (ctx) => ProductDetails(),
+            CartScreen.routeName: (ctx) => CartScreen(),
+            OrderScreen.routeName: (ctx) => OrderScreen(),
+            ManageProductScreen.routeName: (ctx) => ManageProductScreen(),
+            EditProduct.routeName: (ctx) => EditProduct(),
+            AuthScreen.routeName: (ctx) => AuthScreen(),
+          },
+        );
+      }),
     );
   }
 }
