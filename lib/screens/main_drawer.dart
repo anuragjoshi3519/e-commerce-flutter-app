@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/auth.dart';
 import '../screens/cart_screen.dart';
 import '../screens/manage_product_screen.dart';
 import '../screens/order_screen.dart';
@@ -93,22 +95,31 @@ class MainDrawer extends StatelessWidget {
                 leading: const Icon(Icons.settings),
                 title: const Text(
                   "Settings",
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 15),
                 ),
                 onTap: () => null,
               ),
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.exit_to_app),
+                leading: const Icon(Icons.logout),
+                title: const Text(
+                  "Log out",
+                  style: TextStyle(fontSize: 15),
+                ),
+                onTap: () => Provider.of<Auth>(context,listen: false).logout(),            
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.exit_to_app_rounded),
                 title: const Text(
                   "Exit",
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 15),
                 ),
                 onTap: () => showDialog(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                            title: const Text("Exit"),
-                            content: const Text("Do you really want to exit?"),
+                            title: const Text("Exit?"),
+                            content: const Text("Do you really wish to exit?"),
                             actions: [
                               FlatButton(
                                 onPressed: () => Navigator.of(ctx).pop(),
@@ -120,7 +131,7 @@ class MainDrawer extends StatelessWidget {
                               ),
                             ])),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
             ],
           ),
         ),
