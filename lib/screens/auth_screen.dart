@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,58 +15,65 @@ class AuthScreen extends StatelessWidget {
     final deviceSize = MediaQuery.of(context).size;
     // final transformConfig = Matrix4.rotationZ(-8 * pi / 180);
     // transformConfig.translate(-10.0);
-    return SafeArea(
-      child: Scaffold(
-        // resizeToAvoidBottomInset: false,
-        body: Stack(
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    const Color.fromRGBO(0, 220, 220, 1).withOpacity(0.7),
-                    const Color.fromRGBO(0, 80, 80, 1).withOpacity(1.0),
-                  ],
-                  begin: Alignment.bottomRight,
-                  end: Alignment.topLeft,
-                  stops: const [0, 1],
-                ),
+    return Scaffold(
+      // resizeToAvoidBottomInset: false,
+      body: Stack(
+        children: <Widget>[
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.fromRGBO(0, 90, 90, 1),
+                  Color.fromRGBO(10, 10, 10, 1),
+                ],
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                stops: [0, 1],
               ),
             ),
-            Container(
+          ),
+          Container(
               alignment: Alignment.topLeft,
               padding: const EdgeInsets.only(left: 15.0, top: 5.0),
-              // transform: Matrix4.rotationZ(-8 * pi / 180)
-              //   ..translate(-10.0),
-              // ..translate(-10.0),
-              // decoration: BoxDecoration(
-              //   borderRadius: BorderRadius.circular(20),
-              //   color: Colors.deepOrange.shade900,
-              //   boxShadow: const [
-              //     BoxShadow(
-              //       blurRadius: 8,
-              //       color: Colors.black26,
-              //       offset: Offset(0, 2),
-              //     )
-              //   ],
-              // ),
-              child: Text(
-                "Shop'In\nProxy",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: deviceSize.height * 0.1,
-                  fontFamily: 'Montserrat',
-                  fontWeight: FontWeight.w700,
+              transform: Matrix4.rotationZ(60 * pi / 180)
+                ..translate(-110.0, -380.0),
+              decoration: const BoxDecoration(
+                // borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  colors: [
+                    Color.fromRGBO(0, 50, 70, 1),
+                    Color.fromRGBO(80, 80, 80, 1),
+                  ],
+                  begin: Alignment.bottomLeft,
+                  end: Alignment.topRight,
+                  stops: [0, 1],
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 20,
+                    color: Colors.black,
+                    offset: Offset(0, 2),
+                  )
+                ],
+              )),
+          Container(
+            padding: const EdgeInsets.only(top: 20.0, left: 10.0),
+            child: Text(
+              "Shopp'In\nProxy",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: deviceSize.height * 0.08,
+                fontFamily: 'Montserrat',
+                fontWeight: FontWeight.w700,
               ),
             ),
-            Container(
-              margin: EdgeInsets.only(top: deviceSize.height * 0.15),
-              alignment: Alignment.center,
-              child: const AuthCard(),
-            ),
-          ],
-        ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: deviceSize.height * 0.15),
+            alignment: Alignment.center,
+            child: const AuthCard(),
+          ),
+        ],
       ),
     );
   }
@@ -90,6 +98,20 @@ class _AuthCardState extends State<AuthCard> {
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
+  void showDialogBox(String title, String content) {
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              title: Text(title),
+              content: Text(content),
+              actions: [
+                FlatButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('CLOSE'))
+              ],
+            ));
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
@@ -101,79 +123,41 @@ class _AuthCardState extends State<AuthCard> {
     });
     if (_authMode == AuthMode.Login) {
       try {
-        await Provider.of<Auth>(context, listen: false)
-            .authenticate(_authData['email'], _authData['password'], 'signin');
+        await Provider.of<Auth>(context, listen: false).authenticate(
+            _authData['email'], _authData['password'], 'signInWithPassword');
       } on HTTPException catch (error) {
         String message = "Something went wrong! Please try again.";
-        if (error == 'EMAIL_NOT_FOUND') {
-          message = "There is no user with given email ID.";
-        } else if (error == 'INVALID_PASSWORD') {
-          message = "Wrong password.";
-        } else if (error == 'TOO_MANY_ATTEMPTS_TRY_LATER') {
+        if (error.toString().contains('EMAIL_NOT_FOUND')) {
+          message = "There is no user registered with given email address.";
+        } else if (error.toString().contains('INVALID_EMAIL')) {
+          message = "There is no user registered with given email address.";
+        } else if (error.toString().contains('INVALID_PASSWORD')) {
+          message = "You have entered wrong password. Please try again.";
+        } else if (error.toString().contains('TOO_MANY_ATTEMPTS_TRY_LATER')) {
           message =
-              "Too many failed attempts. Account has been temporily disabled.";
+              "Too many failed attempts. Account has been temporarily disabled.";
         }
-        showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-                  title: const Text("Authentication Failed!"),
-                  content: Text(message),
-                  actions: [
-                    FlatButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('CLOSE'))
-                  ],
-                ));
+        showDialogBox('Authentication Failed', message);
       } catch (e) {
-        showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-                  title: const Text("Authentication Failed!"),
-                  content:
-                      const Text("Something went wrong! Please try again."),
-                  actions: [
-                    FlatButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('CLOSE'))
-                  ],
-                ));
+        showDialogBox("ERROR", 'Something went wrong! Please try again.');
       }
     } else {
       try {
         await Provider.of<Auth>(context, listen: false)
-            .authenticate(_authData['email'], _authData['password'], 'signup');
+            .authenticate(_authData['email'], _authData['password'], 'signUp');
       } on HTTPException catch (error) {
         String message = "Something went wrong! Please try again.";
-        if (error == 'EMAIL_EXISTS') {
+        if (error.toString().contains('EMAIL_EXISTS')) {
           message = "Email ID is already in use.";
-        } else if (error == 'TOO_MANY_ATTEMPTS_TRY_LATER') {
+        } else if (error.toString().contains('INVALID_EMAIL')) {
+          message = "Please enter a valid email address.";
+        } else if (error.toString().contains('TOO_MANY_ATTEMPTS_TRY_LATER')) {
           message =
               "Too many failed attempts. Account has been temporily disabled.";
         }
-        showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-                  title: const Text("Authentication Failed!"),
-                  content: Text(message),
-                  actions: [
-                    FlatButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('CLOSE'))
-                  ],
-                ));
+        showDialogBox('Authentication Failed', message);
       } catch (e) {
-        showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-                  title: const Text("Authentication Failed!"),
-                  content:
-                      const Text("Something went wrong! Please try again."),
-                  actions: [
-                    FlatButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('CLOSE'))
-                  ],
-                ));
+        showDialogBox("ERROR", 'Something went wrong! Please try again.');
       }
     }
     setState(() {
@@ -197,7 +181,7 @@ class _AuthCardState extends State<AuthCard> {
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
     return Card(
-      margin: EdgeInsets.only(top: deviceSize.height * 0.1),
+      margin: EdgeInsets.only(top: deviceSize.height * 0.08),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24.0),
       ),
@@ -207,8 +191,8 @@ class _AuthCardState extends State<AuthCard> {
         height: _authMode == AuthMode.Signup ? 350 : 290,
         constraints:
             BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 320 : 260),
-        width: deviceSize.width * 0.85,
-        padding: const EdgeInsets.all(16.0),
+        width: deviceSize.width * 0.90,
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -264,7 +248,9 @@ class _AuthCardState extends State<AuthCard> {
                 else
                   RaisedButton(
                     child: Text(
-                        _authMode == AuthMode.Login ? 'LOG IN' : 'SIGN UP'),
+                      _authMode == AuthMode.Login ? 'LOG IN' : 'SIGN UP',
+                      style: const TextStyle(fontFamily: "Lato", fontSize: 18),
+                    ),
                     onPressed: _submit,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
@@ -275,8 +261,12 @@ class _AuthCardState extends State<AuthCard> {
                     textColor: Theme.of(context).primaryTextTheme.button.color,
                   ),
                 FlatButton(
-                  child:
-                      Text(_authMode == AuthMode.Login ? 'SIGN UP' : 'LOG IN'),
+                  child: Text(
+                      _authMode == AuthMode.Login ? 'SIGN UP' : 'LOG IN',
+                      style: const TextStyle(
+                          fontFamily: "Lato",
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold)),
                   onPressed: _switchAuthMode,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 30.0, vertical: 4),

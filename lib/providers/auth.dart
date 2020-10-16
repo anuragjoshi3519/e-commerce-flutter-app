@@ -24,44 +24,31 @@ class Auth with ChangeNotifier {
     return _authToken;
   }
 
-  void logout(){
-    _authToken="";
-    _userId="";
-    _expiryIn="";
-    _isAuthenticated=false;
+  void logout() {
+    _authToken = "";
+    _userId = "";
+    _expiryIn = "";
+    _isAuthenticated = false;
     notifyListeners();
   }
-  
+
   Future<void> authenticate(
       String email, String password, String action) async {
     dynamic response;
-    if (action == 'signup') {
-      try {
-        response = await http.post(
-            'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FlutterConfig.get('API_KEY')}',
-            body: json.encode({
-              'email': email,
-              'password': password,
-              'returnSecureToken': true
-            }));
-      } catch (err) {
-        rethrow;
-      }
-    } else {
-      try {
-        response = await http.post(
-            'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FlutterConfig.get('API_KEY')}',
-            body: json.encode({
-              'email': email,
-              'password': password,
-              'returnSecureToken': true
-            }));
-      } catch (err) {
-        rethrow;
-      }
+    try {
+      response = await http.post(
+          'https://identitytoolkit.googleapis.com/v1/accounts:$action?key=${FlutterConfig.get('API_KEY')}',
+          body: json.encode({
+            'email': email,
+            'password': password,
+            'returnSecureToken': true
+          }));
+    } catch (err) {
+      rethrow;
     }
     response = json.decode(response.body);
     if (response['error'] != null) {
+      print(response['error']['message']);
       throw HTTPException(response['error']['message']);
     } else {
       _authToken = response['idToken'];
