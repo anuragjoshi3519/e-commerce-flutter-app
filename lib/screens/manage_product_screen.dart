@@ -123,7 +123,7 @@ class _ManageProductItemState extends State<ManageProductItem> {
                             context: context,
                             builder: (ctx) => AlertDialog(
                               title: const Text(
-                                "Delete Product?",
+                                "Are you sure?",
                               ),
                               content: const Text(
                                 "This action will permanently delete the product.",
