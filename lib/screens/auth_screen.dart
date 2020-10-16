@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import './product_overview_screen.dart';
+import '../models/http_exception.dart';
+import '../providers/auth.dart';
 
 enum AuthMode { Signup, Login }
 
@@ -88,7 +90,7 @@ class _AuthCardState extends State<AuthCard> {
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
       return;
@@ -98,10 +100,81 @@ class _AuthCardState extends State<AuthCard> {
       _isLoading = true;
     });
     if (_authMode == AuthMode.Login) {
-      Navigator.pushReplacementNamed(context, ProductsOverviewScreen.routeName);
-      // Log user in
+      try {
+        await Provider.of<Auth>(context, listen: false)
+            .authenticate(_authData['email'], _authData['password'], 'signin');
+      } on HTTPException catch (error) {
+        String message = "Something went wrong! Please try again.";
+        if (error == 'EMAIL_NOT_FOUND') {
+          message = "There is no user with given email ID.";
+        } else if (error == 'INVALID_PASSWORD') {
+          message = "Wrong password.";
+        } else if (error == 'TOO_MANY_ATTEMPTS_TRY_LATER') {
+          message =
+              "Too many failed attempts. Account has been temporily disabled.";
+        }
+        showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+                  title: const Text("Authentication Failed!"),
+                  content: Text(message),
+                  actions: [
+                    FlatButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('CLOSE'))
+                  ],
+                ));
+      } catch (e) {
+        showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+                  title: const Text("Authentication Failed!"),
+                  content:
+                      const Text("Something went wrong! Please try again."),
+                  actions: [
+                    FlatButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('CLOSE'))
+                  ],
+                ));
+      }
     } else {
-      // Sign user up
+      try {
+        await Provider.of<Auth>(context, listen: false)
+            .authenticate(_authData['email'], _authData['password'], 'signup');
+      } on HTTPException catch (error) {
+        String message = "Something went wrong! Please try again.";
+        if (error == 'EMAIL_EXISTS') {
+          message = "Email ID is already in use.";
+        } else if (error == 'TOO_MANY_ATTEMPTS_TRY_LATER') {
+          message =
+              "Too many failed attempts. Account has been temporily disabled.";
+        }
+        showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+                  title: const Text("Authentication Failed!"),
+                  content: Text(message),
+                  actions: [
+                    FlatButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('CLOSE'))
+                  ],
+                ));
+      } catch (e) {
+        showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+                  title: const Text("Authentication Failed!"),
+                  content:
+                      const Text("Something went wrong! Please try again."),
+                  actions: [
+                    FlatButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('CLOSE'))
+                  ],
+                ));
+      }
     }
     setState(() {
       _isLoading = false;
