@@ -96,6 +96,7 @@ class _AuthCardState extends State<AuthCard> {
     'password': '',
   };
   var _isLoading = false;
+  var _showPassword = false;
   final _passwordController = TextEditingController();
 
   void showDialogBox(String title, String content) {
@@ -189,194 +190,223 @@ class _AuthCardState extends State<AuthCard> {
       elevation: 0.0,
       child: Container(
         alignment: Alignment.center,
-        height: _authMode == AuthMode.Signup ? 400 : 335,
+        height: _authMode == AuthMode.Signup ? 470 : 400,
         constraints:
-            BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 370 : 310),
+            BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 450 : 390),
         width: deviceSize.width * 0.96,
         padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                TextFormField(
-                  style: const TextStyle(fontFamily: "Lato"),
-                  decoration: const InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    prefixIcon: Icon(Icons.email),
-                    floatingLabelBehavior: FloatingLabelBehavior.never,
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.white,
-                      ),
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(16.0),
-                      ),
-                    ),
-                    labelStyle:
-                        TextStyle(fontFamily: "Lato", color: Colors.grey),
-                    helperStyle: TextStyle(
-                      fontFamily: "Lato",
-                      color: Colors.black,
-                    ),
-                    labelText: 'Email ID',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(16.0),
-                      ),
-                    ),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value.isEmpty || !value.contains('@')) {
-                      return 'Invalid email!';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _authData['email'] = value;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  style: const TextStyle(
-                    fontFamily: "Lato",
-                  ),
-                  decoration: const InputDecoration(
-                    helperText: "Password must be atleast 6 characters long",
-                    prefixIcon: Icon(
-                      Icons.vpn_key_rounded,
-                    ),
-                    floatingLabelBehavior: FloatingLabelBehavior.never,
-                    filled: true,
-                    fillColor: Colors.white,
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.white,
-                      ),
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(16.0),
-                      ),
-                    ),
-                    labelStyle:
-                        TextStyle(fontFamily: "Lato", color: Colors.grey),
-                    helperStyle:
-                        TextStyle(fontFamily: "Lato", color: Colors.white),
-                    labelText: 'Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(16.0),
-                      ),
-                    ),
-                  ),
-                  obscureText: true,
-                  controller: _passwordController,
-                  validator: (value) {
-                    if (value.isEmpty || value.length < 5) {
-                      return 'Password is too short!';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _authData['password'] = value;
-                  },
-                ),
-                const SizedBox(height: 16),
-                if (_authMode == AuthMode.Signup)
-                  TextFormField(
-                    style: const TextStyle(
-                      fontFamily: "Lato",
-                    ),
-                    enabled: _authMode == AuthMode.Signup,
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.lock),
-                      floatingLabelBehavior: FloatingLabelBehavior.never,
-                      filled: true,
-                      fillColor: Colors.white,
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.white,
-                        ),
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(16.0),
-                        ),
-                      ),
-                      labelStyle:
-                          TextStyle(fontFamily: "Lato", color: Colors.grey),
-                      helperStyle:
-                          TextStyle(fontFamily: "Lato", color: Colors.black),
-                      labelText: 'Confirm Password',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(16.0),
-                        ),
-                      ),
-                    ),
-                    obscureText: true,
-                    validator: _authMode == AuthMode.Signup
-                        ? (value) {
-                            if (value != _passwordController.text) {
-                              return 'Passwords do not match!';
-                            }
-                            return null;
-                          }
-                        : null,
-                  ),
-                const SizedBox(
-                  height: 20,
-                ),
-                if (_isLoading)
-                  const CircularProgressIndicator()
-                else
-                  RaisedButton(
-                    child: Container(
-                      width: 100,
-                      child: Row(
-                        children: [
-                          Text(
-                            _authMode == AuthMode.Login ? 'LOG IN' : 'SIGN UP',
-                            style: const TextStyle(
-                                fontFamily: "Lato", fontSize: 18),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Text(
+                _authMode == AuthMode.Login
+                    ? "Log into your account"
+                    : "Create a new account",
+                style: const TextStyle(
+                    fontFamily: "Lato", color: Colors.white, fontSize: 19),
+              ),
+              const SizedBox(height: 24),
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      style: const TextStyle(fontFamily: "Lato"),
+                      decoration: const InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        prefixIcon: Icon(Icons.email),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.white,
                           ),
-                          const Spacer(),
-                          if (_authMode == AuthMode.Login)
-                            const Icon(
-                              Icons.login,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(16.0),
+                          ),
+                        ),
+                        labelStyle:
+                            TextStyle(fontFamily: "Lato", color: Colors.grey),
+                        helperStyle: TextStyle(
+                          fontFamily: "Lato",
+                          color: Colors.black,
+                        ),
+                        labelText: 'Email ID',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(16.0),
+                          ),
+                        ),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value.isEmpty || !value.contains('@')) {
+                          return 'Invalid email!';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        _authData['email'] = value;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      style: const TextStyle(
+                        fontFamily: "Lato",
+                      ),
+                      decoration: InputDecoration(
+                        helperText:
+                            "Password must be atleast 6 characters long",
+                        prefixIcon: const Icon(
+                          Icons.vpn_key_rounded,
+                        ),
+                        suffixIcon: GestureDetector(
+                          onTap: () => {
+                            setState(() {
+                              _showPassword = !_showPassword;
+                            })
+                          },
+                          child: Icon(
+                            _showPassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                        filled: true,
+                        fillColor: Colors.white,
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.white,
+                          ),
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(16.0),
+                          ),
+                        ),
+                        labelStyle: const TextStyle(
+                            fontFamily: "Lato", color: Colors.grey),
+                        helperStyle: const TextStyle(
+                            fontFamily: "Lato", color: Colors.white),
+                        labelText: 'Password',
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(16.0),
+                          ),
+                        ),
+                      ),
+                      obscureText: !_showPassword,
+                      controller: _passwordController,
+                      validator: (value) {
+                        if (value.isEmpty || value.length < 5) {
+                          return 'Password is too short!';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        _authData['password'] = value;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    if (_authMode == AuthMode.Signup)
+                      TextFormField(
+                        style: const TextStyle(
+                          fontFamily: "Lato",
+                        ),
+                        enabled: _authMode == AuthMode.Signup,
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.lock),
+                          floatingLabelBehavior: FloatingLabelBehavior.never,
+                          filled: true,
+                          fillColor: Colors.white,
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
                               color: Colors.white,
                             ),
-                          if (_authMode != AuthMode.Login)
-                            const Icon(Icons.app_registration,
-                                color: Colors.white),
-                        ],
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(16.0),
+                            ),
+                          ),
+                          labelStyle:
+                              TextStyle(fontFamily: "Lato", color: Colors.grey),
+                          helperStyle: TextStyle(
+                              fontFamily: "Lato", color: Colors.black),
+                          labelText: 'Confirm Password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(16.0),
+                            ),
+                          ),
+                        ),
+                        obscureText: true,
+                        validator: _authMode == AuthMode.Signup
+                            ? (value) {
+                                if (value != _passwordController.text) {
+                                  return 'Passwords do not match!';
+                                }
+                                return null;
+                              }
+                            : null,
                       ),
+                    const SizedBox(
+                      height: 20,
                     ),
-                    onPressed: _submit,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                    if (_isLoading)
+                      const CircularProgressIndicator()
+                    else
+                      RaisedButton(
+                        child: Container(
+                          width: 100,
+                          child: Row(
+                            children: [
+                              Text(
+                                _authMode == AuthMode.Login
+                                    ? 'LOG IN'
+                                    : 'SIGN UP',
+                                style: const TextStyle(
+                                    fontFamily: "Lato", fontSize: 18),
+                              ),
+                              const Spacer(),
+                              if (_authMode == AuthMode.Login)
+                                const Icon(
+                                  Icons.login,
+                                  color: Colors.white,
+                                ),
+                              if (_authMode != AuthMode.Login)
+                                const Icon(Icons.app_registration,
+                                    color: Colors.white),
+                            ],
+                          ),
+                        ),
+                        onPressed: _submit,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30.0, vertical: 8.0),
+                        color: Theme.of(context).primaryColor,
+                        textColor:
+                            Theme.of(context).primaryTextTheme.button.color,
+                      ),
+                    FlatButton(
+                      child: Text(
+                        _authMode == AuthMode.Login ? 'SIGN UP' : 'LOG IN',
+                        style: const TextStyle(
+                            fontFamily: "Lato",
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                      ),
+                      onPressed: _switchAuthMode,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30.0, vertical: 4),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      textColor: Theme.of(context).primaryColor,
                     ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30.0, vertical: 8.0),
-                    color: Theme.of(context).primaryColor,
-                    textColor: Theme.of(context).primaryTextTheme.button.color,
-                  ),
-                FlatButton(
-                  child: Text(
-                    _authMode == AuthMode.Login ? 'SIGN UP' : 'LOG IN',
-                    style: const TextStyle(
-                        fontFamily: "Lato",
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                  onPressed: _switchAuthMode,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 30.0, vertical: 4),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  textColor: Theme.of(context).primaryColor,
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
