@@ -181,17 +181,18 @@ class _AuthCardState extends State<AuthCard> {
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
     return Card(
-      margin: EdgeInsets.only(top: deviceSize.height * 0.08),
+      color: Colors.transparent,
+      margin: EdgeInsets.only(top: deviceSize.height * 0.09),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24.0),
       ),
-      elevation: 16.0,
+      elevation: 0.0,
       child: Container(
         alignment: Alignment.center,
-        height: _authMode == AuthMode.Signup ? 350 : 290,
+        height: _authMode == AuthMode.Signup ? 400 : 335,
         constraints:
-            BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 320 : 260),
-        width: deviceSize.width * 0.90,
+            BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 370 : 310),
+        width: deviceSize.width * 0.96,
         padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
@@ -199,7 +200,33 @@ class _AuthCardState extends State<AuthCard> {
             child: Column(
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Email ID'),
+                  style: const TextStyle(fontFamily: "Lato"),
+                  decoration: const InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    prefixIcon: Icon(Icons.email),
+                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.white,
+                      ),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(16.0),
+                      ),
+                    ),
+                    labelStyle:
+                        TextStyle(fontFamily: "Lato", color: Colors.grey),
+                    helperStyle: TextStyle(
+                      fontFamily: "Lato",
+                      color: Colors.black,
+                    ),
+                    labelText: 'Email ID',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(16.0),
+                      ),
+                    ),
+                  ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value.isEmpty || !value.contains('@')) {
@@ -211,8 +238,38 @@ class _AuthCardState extends State<AuthCard> {
                     _authData['email'] = value;
                   },
                 ),
+                const SizedBox(height: 16),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Password'),
+                  style: const TextStyle(
+                    fontFamily: "Lato",
+                  ),
+                  decoration: const InputDecoration(
+                    helperText: "Password must be atleast 6 characters long",
+                    prefixIcon: Icon(
+                      Icons.vpn_key_rounded,
+                    ),
+                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                    filled: true,
+                    fillColor: Colors.white,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.white,
+                      ),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(16.0),
+                      ),
+                    ),
+                    labelStyle:
+                        TextStyle(fontFamily: "Lato", color: Colors.grey),
+                    helperStyle:
+                        TextStyle(fontFamily: "Lato", color: Colors.white),
+                    labelText: 'Password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(16.0),
+                      ),
+                    ),
+                  ),
                   obscureText: true,
                   controller: _passwordController,
                   validator: (value) {
@@ -225,11 +282,37 @@ class _AuthCardState extends State<AuthCard> {
                     _authData['password'] = value;
                   },
                 ),
+                const SizedBox(height: 16),
                 if (_authMode == AuthMode.Signup)
                   TextFormField(
+                    style: const TextStyle(
+                      fontFamily: "Lato",
+                    ),
                     enabled: _authMode == AuthMode.Signup,
-                    decoration:
-                        const InputDecoration(labelText: 'Confirm Password'),
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.lock),
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      filled: true,
+                      fillColor: Colors.white,
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.white,
+                        ),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(16.0),
+                        ),
+                      ),
+                      labelStyle:
+                          TextStyle(fontFamily: "Lato", color: Colors.grey),
+                      helperStyle:
+                          TextStyle(fontFamily: "Lato", color: Colors.black),
+                      labelText: 'Confirm Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(16.0),
+                        ),
+                      ),
+                    ),
                     obscureText: true,
                     validator: _authMode == AuthMode.Signup
                         ? (value) {
@@ -247,9 +330,26 @@ class _AuthCardState extends State<AuthCard> {
                   const CircularProgressIndicator()
                 else
                   RaisedButton(
-                    child: Text(
-                      _authMode == AuthMode.Login ? 'LOG IN' : 'SIGN UP',
-                      style: const TextStyle(fontFamily: "Lato", fontSize: 18),
+                    child: Container(
+                      width: 100,
+                      child: Row(
+                        children: [
+                          Text(
+                            _authMode == AuthMode.Login ? 'LOG IN' : 'SIGN UP',
+                            style: const TextStyle(
+                                fontFamily: "Lato", fontSize: 18),
+                          ),
+                          const Spacer(),
+                          if (_authMode == AuthMode.Login)
+                            const Icon(
+                              Icons.login,
+                              color: Colors.white,
+                            ),
+                          if (_authMode != AuthMode.Login)
+                            const Icon(Icons.app_registration,
+                                color: Colors.white),
+                        ],
+                      ),
                     ),
                     onPressed: _submit,
                     shape: RoundedRectangleBorder(
@@ -262,11 +362,13 @@ class _AuthCardState extends State<AuthCard> {
                   ),
                 FlatButton(
                   child: Text(
-                      _authMode == AuthMode.Login ? 'SIGN UP' : 'LOG IN',
-                      style: const TextStyle(
-                          fontFamily: "Lato",
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold)),
+                    _authMode == AuthMode.Login ? 'SIGN UP' : 'LOG IN',
+                    style: const TextStyle(
+                        fontFamily: "Lato",
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                  ),
                   onPressed: _switchAuthMode,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 30.0, vertical: 4),
