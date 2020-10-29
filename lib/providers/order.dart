@@ -28,6 +28,10 @@ class OrderItem {
 }
 
 class Order with ChangeNotifier {
+
+  Order(this._authToken,this._orderItems);
+
+  final String _authToken;
   List<OrderItem> _orderItems = [];
 
   List<OrderItem> get orderItems {
@@ -37,7 +41,7 @@ class Order with ChangeNotifier {
   Future<void> fetchOrders() async {
     try {
       final response =
-          await http.get('${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/orders.json');
+          await http.get('${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/orders.json?auth=$_authToken');
       final _loadedOrders = json.decode(response.body) as Map<String, dynamic>;
       final List<OrderItem> _orders = [];
       if (_loadedOrders != null) {
@@ -73,7 +77,7 @@ class Order with ChangeNotifier {
   Future<void> addOrder(List<CartItem> cartItems) async {
     try {
       final response =
-          await http.post('${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/orders.json',
+          await http.post('${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/orders.json?auth=$_authToken',
               body: json.encode({
                 'items': cartItems
                     .map(

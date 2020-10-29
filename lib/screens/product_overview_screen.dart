@@ -34,105 +34,106 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        drawer: MainDrawer(),
-        appBar: AppBar(
-          title: Text(_showFavorite ? "Your Favorites" : "Local Market",
-              style: Theme.of(context)
-                  .textTheme
-                  .headline6
-                  .copyWith(color: Colors.white)),
-          actions: [
-            Consumer<Cart>(
-              builder: (ctx, cart, _) => Badge(
-                child: IconButton(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, CartScreen.routeName),
-                    icon: const Icon(Icons.shopping_cart)),
-                value: cart.totalItems.toString(),
-                color: Colors.orange[300],
-              ),
+    return Scaffold(
+      drawer: MainDrawer(),
+      appBar: AppBar(
+        title: Text(_showFavorite ? "Your Favorites" : "Local Market",
+            style: Theme.of(context)
+                .textTheme
+                .headline6
+                .copyWith(color: Colors.white)),
+        actions: [
+          Consumer<Cart>(
+            builder: (ctx, cart, _) => Badge(
+              child: IconButton(
+                  onPressed: () =>
+                      Navigator.pushNamed(context, CartScreen.routeName),
+                  icon: const Icon(Icons.shopping_cart)),
+              value: cart.totalItems.toString(),
+              color: Colors.orange[300],
             ),
-            PopupMenuButton(
-                color: Colors.grey[50],
-                icon: const Icon(Icons.more_vert),
-                elevation: 7,
-                onSelected: (FilterOptions option) {
-                  setState(() {
-                    if (option == FilterOptions.All)
-                      _showFavorite = false;
-                    else
-                      _showFavorite = true;
-                  });
-                },
-                itemBuilder: (ctx) => [
-                      PopupMenuItem(
-                        child: Row(
-                          children: [
-                            Icon(Icons.all_inclusive,
-                                color: Theme.of(context).accentColor),
-                            const SizedBox(width: 7),
-                            const Text("Show All"),
-                          ],
-                        ),
-                        value: FilterOptions.All,
+          ),
+          PopupMenuButton(
+              color: Colors.grey[50],
+              icon: const Icon(Icons.more_vert),
+              elevation: 7,
+              onSelected: (FilterOptions option) {
+                setState(() {
+                  if (option == FilterOptions.All)
+                    _showFavorite = false;
+                  else
+                    _showFavorite = true;
+                });
+              },
+              itemBuilder: (ctx) => [
+                    PopupMenuItem(
+                      child: Row(
+                        children: [
+                          Icon(Icons.all_inclusive,
+                              color: Theme.of(context).accentColor),
+                          const SizedBox(width: 7),
+                          const Text("Show All"),
+                        ],
                       ),
-                      PopupMenuItem(
-                        child: Row(
-                          // ignore: prefer_const_literals_to_create_immutables
-                          children: [
-                            const Icon(Icons.favorite, color: Colors.red),
-                            const SizedBox(width: 7),
-                            const Text("Only Favorites"),
-                          ],
-                        ),
-                        value: FilterOptions.Favorites,
-                      )
-                    ])
-          ],
-        ),
-        body: FutureBuilder(
-            future: _productsFuture,
-            builder: (ctx, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    CircularProgressIndicator(),
-                    Text("Loading products...")
-                  ],
-                ));
-              } else {
-                if (snapshot.error != null) {
-                  return AlertDialog(
-                    title: const Text("Error in loading products"),
-                    content: const Text("Please try again."),
-                    actions: [
-                      FlatButton(
-                        child: const Text("Exit"),
-                        onPressed: () {
-                          SystemNavigator.pop();
-                        },
+                      value: FilterOptions.All,
+                    ),
+                    PopupMenuItem(
+                      child: Row(
+                        // ignore: prefer_const_literals_to_create_immutables
+                        children: [
+                          const Icon(Icons.favorite, color: Colors.red),
+                          const SizedBox(width: 7),
+                          const Text("Only Favorites"),
+                        ],
                       ),
-                      FlatButton(
-                        onPressed: () {
-                          setState(() {
-                            _productsFuture = _loadProducts();
-                          });
-                        },
-                        child: const Text("Retry"),
-                      )
-                    ],
-                  );
-                }
-                return RefreshIndicator(
-                    onRefresh: _loadProducts,
-                    child: ProductsGrid(showFavs: _showFavorite));
-              }
-            }),
+                      value: FilterOptions.Favorites,
+                    )
+                  ])
+        ],
       ),
+      body: FutureBuilder(
+          future: _productsFuture,
+          builder: (ctx, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  CircularProgressIndicator(),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Text("Loading products...")
+                ],
+              ));
+            } else {
+              if (snapshot.error != null) {
+                return AlertDialog(
+                  title: const Text("Error in loading products"),
+                  content: const Text("Please try again."),
+                  actions: [
+                    FlatButton(
+                      child: const Text("Exit"),
+                      onPressed: () {
+                        SystemNavigator.pop();
+                      },
+                    ),
+                    FlatButton(
+                      onPressed: () {
+                        setState(() {
+                          _productsFuture = _loadProducts();
+                        });
+                      },
+                      child: const Text("Retry"),
+                    )
+                  ],
+                );
+              }
+              return RefreshIndicator(
+                  onRefresh: _loadProducts,
+                  child: ProductsGrid(showFavs: _showFavorite));
+            }
+          }),
     );
   }
 }

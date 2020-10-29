@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth.dart';
+import '../providers/products.dart';
 import '../screens/cart_screen.dart';
 import '../screens/manage_product_screen.dart';
 import '../screens/order_screen.dart';
@@ -17,7 +18,7 @@ class MainDrawer extends StatelessWidget {
           child: Column(
             children: [
               AppBar(
-                toolbarHeight: kToolbarHeight + 15,
+                toolbarHeight: kToolbarHeight + 16,
                 leading: const Padding(
                   padding: EdgeInsets.only(left: 15.0, top: 8.0, bottom: 8.0),
                   child: CircleAvatar(
@@ -86,9 +87,12 @@ class MainDrawer extends StatelessWidget {
                   style: TextStyle(fontSize: 16),
                 ),
                 subtitle: const Text("Add or edit your products"),
-                onTap: () => Navigator.of(context).pushReplacementNamed(
-                  ManageProductScreen.routeName,
-                ),
+                onTap: () {
+                  Provider.of<Products>(context,listen:false).clearList();
+                  Navigator.of(context).pushReplacementNamed(
+                    ManageProductScreen.routeName,
+                  );
+                },
               ),
               const Spacer(),
               ListTile(
@@ -106,7 +110,25 @@ class MainDrawer extends StatelessWidget {
                   "Log out",
                   style: TextStyle(fontSize: 15),
                 ),
-                onTap: () => Provider.of<Auth>(context,listen: false).logout(),            
+                onTap: () => showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                      title: const Text("Logging out?"),
+                      content: const Text("Do you wish to continue?"),
+                      actions: [
+                        FlatButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: const Text("NO"),
+                        ),
+                        FlatButton(
+                          onPressed: () {
+                            Navigator.of(ctx).pop();
+                            Provider.of<Auth>(context, listen: false).logout();
+                          },
+                          child: const Text("YES"),
+                        ),
+                      ]),
+                ),
               ),
               const Divider(),
               ListTile(

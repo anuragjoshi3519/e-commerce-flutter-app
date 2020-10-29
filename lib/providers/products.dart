@@ -8,10 +8,19 @@ import '../models/http_exception.dart';
 import './product.dart';
 
 class Products with ChangeNotifier {
+  Products(this._authToken, this._userId, this._items);
+
+  final String _authToken;
+  final String _userId;
   List<Product> _items = [];
 
   Product findById(String id) {
     return _items.firstWhere((element) => element.id == id, orElse: () => null);
+  }
+
+  void clearList(){
+    _items=[];
+    notifyListeners();
   }
 
   Future<void> updateProduct(Product product) async {
@@ -24,7 +33,7 @@ class Products with ChangeNotifier {
       notifyListeners();
     }
     final response = await http.patch(
-        '${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/products/${product.id}.json',
+        '${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/products/${product.id}.json?auth=$_authToken',
         body: json.encode({
           "title": product.title,
           "price": product.price,
@@ -39,11 +48,17 @@ class Products with ChangeNotifier {
     oldProduct = null;
   }
 
-  Future<void> fetchProducts() async {
+  Future<void> fetchProducts([bool filterProducts = false]) async {
+    final String filterQuery =
+        filterProducts ? '&orderBy="creatorId"&equalTo="$_userId"' : '';
     try {
-      final response = await http.get(
-          '${FlutterConfig.get("FIREBASE_REALTIME_DB_URL")}/products.json');
+      var response = await http.get(
+          '${FlutterConfig.get("FIREBASE_REALTIME_DB_URL")}/products.json?auth=$_authToken$filterQuery');
       final loadedProducts = json.decode(response.body) as Map<String, dynamic>;
+      response = await http.get(
+          "${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/userFavourites/$_userId.json?auth=$_authToken");
+      final userFavourites = json.decode(response.body) as Map<String, dynamic>;
+
       final List<Product> prods = [];
       if (loadedProducts != null) {
         loadedProducts.forEach(
@@ -56,7 +71,10 @@ class Products with ChangeNotifier {
                   description: prodData['description'],
                   price: prodData['price'] as double,
                   imageUrl: prodData['imageUrl'],
-                  isFavorite: prodData['isFavorite'] as bool),
+                  // ignore: avoid_bool_literals_in_conditional_expressions
+                  isFavorite: userFavourites == null
+                      ? false
+                      : userFavourites[prodID] ?? false),
             );
           },
         );
@@ -64,6 +82,7 @@ class Products with ChangeNotifier {
       _items = prods;
       notifyListeners();
     } catch (error) {
+      print(error);
       rethrow;
     }
   }
@@ -71,13 +90,13 @@ class Products with ChangeNotifier {
   Future<void> addProduct(Product product) async {
     try {
       final response = await http.post(
-          '${FlutterConfig.get("FIREBASE_REALTIME_DB_URL")}/products.json',
+          '${FlutterConfig.get("FIREBASE_REALTIME_DB_URL")}/products.json?auth=$_authToken',
           body: json.encode({
             'title': product.title,
             'price': product.price,
             "description": product.description,
             "imageUrl": product.imageUrl,
-            "isFavorite": product.isFavorite
+            "creatorId": _userId,
           }));
       final id = json.decode(response.body)['name'];
       _items.insert(
@@ -88,7 +107,7 @@ class Products with ChangeNotifier {
             price: product.price,
             description: product.description,
             imageUrl: product.imageUrl,
-            isFavorite: product.isFavorite,
+            isFavorite: false,
           ));
       notifyListeners();
     } catch (_) {
@@ -102,7 +121,7 @@ class Products with ChangeNotifier {
     _items.removeAt(_productIndex);
     notifyListeners();
     final response = await http.delete(
-        "${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/products/$id.json");
+        "${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/products/$id.json?auth=$_authToken");
 
     if (response.statusCode >= 400) {
       _items.insert(_productIndex, _oldProduct);

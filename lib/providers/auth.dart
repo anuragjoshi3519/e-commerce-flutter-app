@@ -9,11 +9,15 @@ import '../models/http_exception.dart';
 class Auth with ChangeNotifier {
   String _authToken;
   String _userId;
-  String _expiryIn;
-  bool _isAuthenticated = false;
+  DateTime _expiryIn;
 
   bool get isAuthenticated {
-    return _isAuthenticated;
+    if (_expiryIn != null &&
+        _expiryIn.isAfter(DateTime.now()) &&
+        _authToken != null) {
+      return true;
+    }
+    return false;
   }
 
   String get userId {
@@ -25,10 +29,9 @@ class Auth with ChangeNotifier {
   }
 
   void logout() {
-    _authToken = "";
-    _userId = "";
-    _expiryIn = "";
-    _isAuthenticated = false;
+    _authToken = null;
+    _userId = null;
+    _expiryIn = null;
     notifyListeners();
   }
 
@@ -48,13 +51,13 @@ class Auth with ChangeNotifier {
     }
     response = json.decode(response.body);
     if (response['error'] != null) {
-      print(response['error']['message']);
+      // print(response['error']['message']);
       throw HTTPException(response['error']['message']);
     } else {
       _authToken = response['idToken'];
       _userId = response['localId'];
-      _expiryIn = response['expiresIn'];
-      _isAuthenticated = true;
+      _expiryIn = DateTime.now()
+          .add(Duration(seconds: int.parse(response['expiresIn'])));
       notifyListeners();
     }
   }

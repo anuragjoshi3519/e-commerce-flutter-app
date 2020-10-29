@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/screens/product_overview_screen.dart';
 
 import '../providers/products.dart';
 import './edit_product.dart';
@@ -13,57 +15,115 @@ class ManageProductScreen extends StatefulWidget {
 }
 
 class _ManageProductScreenState extends State<ManageProductScreen> {
-  Future<void> refreshProducts() async {
-    await Provider.of<Products>(context, listen: false).fetchProducts();
+  Future _productsFuture;
+
+  Future _fetchProducts() {
+    return Provider.of<Products>(context, listen: false).fetchProducts(true);
+  }
+
+  @override
+  void initState() {
+    _productsFuture = _fetchProducts();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "Your Products",
-            style: Theme.of(context).textTheme.headline6.copyWith(
-                  color: Colors.white,
-                ),
-          ),
-          actions: [
-            Container(
-              margin: const EdgeInsets.only(right: 6.0),
-              child: IconButton(
-                tooltip: "Add a new product",
-                icon: const Icon(
-                  Icons.add,
-                  size: 34,
-                  color: Colors.white,
-                ),
-                onPressed: () => Navigator.of(context).pushNamed(
-                  EditProduct.routeName,
-                  arguments: {"title": "Add Product", "id": ''},
-                ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Your Products",
+          style: Theme.of(context).textTheme.headline6.copyWith(
+                color: Colors.white,
+              ),
+        ),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 6.0),
+            child: IconButton(
+              tooltip: "Add a new product",
+              icon: const Icon(
+                Icons.add,
+                size: 34,
+                color: Colors.white,
+              ),
+              onPressed: () => Navigator.of(context).pushNamed(
+                EditProduct.routeName,
+                arguments: {"title": "Add Product", "id": ''},
               ),
             ),
-          ],
-        ),
-        body: Consumer<Products>(
-            builder: (ctx, products, child) => RefreshIndicator(
-                  onRefresh: refreshProducts,
-                  child: ListView.builder(
-                    itemBuilder: (ctx, i) => Column(
-                      children: [
-                        ManageProductItem(
-                          id: products.items[i].id,
-                          imageUrl: products.items[i].imageUrl,
-                          title: products.items[i].title,
-                        ),
-                      ],
-                    ),
-                    itemCount: products.items.length,
-                  ),
-                )),
-        drawer: MainDrawer(),
+          ),
+          Container(
+            margin: const EdgeInsets.only(right: 6.0),
+            child: IconButton(
+              tooltip: "Go to home screen",
+              icon: const Icon(
+                Icons.home_outlined,
+                size: 28,
+                color: Colors.white,
+              ),
+              onPressed: () => Navigator.of(context).pushReplacementNamed(
+                ProductsOverviewScreen.routeName,
+              ),
+            ),
+          ),
+        ],
       ),
+      body: FutureBuilder(
+          future: _productsFuture,
+          builder: (ctx, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 8),
+                  Text("Loading products...")
+                ],
+              ));
+            } else {
+              if (snapshot.error != null) {
+                return AlertDialog(
+                  title: const Text("Error in loading products"),
+                  content: const Text("Please try again."),
+                  actions: [
+                    FlatButton(
+                      child: const Text("Exit"),
+                      onPressed: () {
+                        SystemNavigator.pop();
+                      },
+                    ),
+                    FlatButton(
+                      onPressed: () {
+                        setState(() {
+                          _productsFuture = _fetchProducts();
+                        });
+                      },
+                      child: const Text("Retry"),
+                    )
+                  ],
+                );
+              }
+              return RefreshIndicator(
+                  onRefresh: _fetchProducts,
+                  child: Consumer<Products>(
+                    builder: (ctx, products, _) => ListView.builder(
+                      itemBuilder: (ctx, i) => Column(
+                        children: [
+                          ManageProductItem(
+                            id: products.items[i].id,
+                            imageUrl: products.items[i].imageUrl,
+                            title: products.items[i].title,
+                          ),
+                        ],
+                      ),
+                      itemCount: products.items.length,
+                    ),
+                  ));
+            }
+          }),
+      drawer: MainDrawer(),
     );
   }
 }
@@ -91,11 +151,15 @@ class _ManageProductItemState extends State<ManageProductItem> {
     return Container(
       child: !_showLoader
           ? Card(
+              elevation: 2.0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18)),
               margin: const EdgeInsets.all(2.0),
               child: ListTile(
-                contentPadding: const EdgeInsets.all(14),
+                contentPadding: const EdgeInsets.all(16),
                 leading: CircleAvatar(
                   backgroundImage: NetworkImage(widget.imageUrl),
+                  radius: 23,
                 ),
                 title: Text(widget.title),
                 trailing: Container(
