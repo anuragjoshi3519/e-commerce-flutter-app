@@ -18,11 +18,6 @@ class Products with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id, orElse: () => null);
   }
 
-  void clearList(){
-    _items=[];
-    notifyListeners();
-  }
-
   Future<void> updateProduct(Product product) async {
     final productIndex =
         _items.indexWhere((element) => element.id == product.id);

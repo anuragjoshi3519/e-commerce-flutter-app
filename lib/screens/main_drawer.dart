@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth.dart';
-import '../providers/products.dart';
 import '../screens/cart_screen.dart';
 import '../screens/manage_product_screen.dart';
 import '../screens/order_screen.dart';
@@ -88,7 +87,6 @@ class MainDrawer extends StatelessWidget {
                 ),
                 subtitle: const Text("Add or edit your products"),
                 onTap: () {
-                  Provider.of<Products>(context,listen:false).clearList();
                   Navigator.of(context).pushReplacementNamed(
                     ManageProductScreen.routeName,
                   );
@@ -122,7 +120,8 @@ class MainDrawer extends StatelessWidget {
                         ),
                         FlatButton(
                           onPressed: () {
-                            Navigator.of(ctx).pop();
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pushReplacementNamed('/');
                             Provider.of<Auth>(context, listen: false).logout();
                           },
                           child: const Text("YES"),
