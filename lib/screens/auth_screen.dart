@@ -57,10 +57,10 @@ class AuthScreen extends StatelessWidget {
           //     )),
           Container(
             padding: EdgeInsets.only(
-                top: deviceSize.height * 0.08, left: deviceSize.width * 0.36),
+                top: deviceSize.height * 0.09, left: deviceSize.width * 0.37),
             child: Image.asset(
               'assets/images/logo.png',
-              scale: 1.5,
+              scale: 1.6,
             ),
           ),
           Container(

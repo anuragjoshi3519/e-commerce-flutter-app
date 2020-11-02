@@ -48,7 +48,7 @@ class Products with ChangeNotifier {
         filterProducts ? '&orderBy="creatorId"&equalTo="$_userId"' : '';
     try {
       var response = await http.get(
-          '${FlutterConfig.get("FIREBASE_REALTIME_DB_URL")}/products.json?auth=$_authToken$filterQuery');
+          '${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/products.json?auth=$_authToken$filterQuery');
       final loadedProducts = json.decode(response.body) as Map<String, dynamic>;
       response = await http.get(
           "${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/userFavourites/$_userId.json?auth=$_authToken");
@@ -85,7 +85,7 @@ class Products with ChangeNotifier {
   Future<void> addProduct(Product product) async {
     try {
       final response = await http.post(
-          '${FlutterConfig.get("FIREBASE_REALTIME_DB_URL")}/products.json?auth=$_authToken',
+          '${FlutterConfig.get('FIREBASE_REALTIME_DB_URL')}/products.json?auth=$_authToken',
           body: json.encode({
             'title': product.title,
             'price': product.price,

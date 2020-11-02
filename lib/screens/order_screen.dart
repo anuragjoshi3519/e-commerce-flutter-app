@@ -60,6 +60,7 @@ class _OrderScreenState extends State<OrderScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
                   CircularProgressIndicator(),
+                  SizedBox(height: 8.0,),
                   Text("Loading orders...")
                 ],
               ));
@@ -90,13 +91,31 @@ class _OrderScreenState extends State<OrderScreen> {
               return RefreshIndicator(
                 onRefresh: _loadOrders,
                 child: orders.orderItems.isEmpty
-                    ? const Center(
-                        child: Text(
-                          "You haven't placed any order.",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.black54,
-                          ),
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              padding: const EdgeInsets.all(0),
+                              icon: Icon(
+                                Icons.home_outlined,
+                                color: Theme.of(context).primaryColor,
+                                size: 44,
+                              ),
+                              onPressed: () => Navigator.pushReplacementNamed(
+                                context,
+                                ProductsOverviewScreen.routeName,
+                              ),
+                            ),
+                            const SizedBox(height: 12.0),
+                            const Text(
+                              "You haven't placed any order.",
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
                         ),
                       )
                     : Container(

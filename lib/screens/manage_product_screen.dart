@@ -121,20 +121,56 @@ class _ManageProductScreenState extends State<ManageProductScreen> {
                 }
                 return RefreshIndicator(
                     onRefresh: _fetchProducts,
-                    child: Consumer<Products>(
-                      builder: (ctx, products, _) => ListView.builder(
-                        itemBuilder: (ctx, i) => Column(
-                          children: [
-                            ManageProductItem(
-                              id: products.items[i].id,
-                              imageUrl: products.items[i].imageUrl,
-                              title: products.items[i].title,
+                    child: Provider.of<Products>(context, listen: false)
+                            .items
+                            .isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  padding: const EdgeInsets.all(0),
+                                  tooltip: "Add a new product",
+                                  icon: Icon(Icons.add_box_outlined,
+                                      size: 44,
+                                      color: Theme.of(context).primaryColor),
+                                  onPressed: () =>
+                                      Navigator.of(context).pushNamed(
+                                    EditProduct.routeName,
+                                    arguments: {
+                                      "title": "Add Product",
+                                      "id": ''
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 12,
+                                ),
+                                const Text(
+                                  'Add a new product to sell.',
+                                  style: TextStyle(
+                                      fontFamily: 'Lato',
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black45),
+                                )
+                              ],
                             ),
-                          ],
-                        ),
-                        itemCount: products.items.length,
-                      ),
-                    ));
+                          )
+                        : Consumer<Products>(
+                            builder: (ctx, products, _) => ListView.builder(
+                              itemBuilder: (ctx, i) => Column(
+                                children: [
+                                  ManageProductItem(
+                                    id: products.items[i].id,
+                                    imageUrl: products.items[i].imageUrl,
+                                    title: products.items[i].title,
+                                  ),
+                                ],
+                              ),
+                              itemCount: products.items.length,
+                            ),
+                          ));
               }
             }),
         onWillPop: onWillPop,
