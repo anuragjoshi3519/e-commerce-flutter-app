@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/screens/product_overview_screen.dart';
 
@@ -25,6 +26,18 @@ class _ManageProductScreenState extends State<ManageProductScreen> {
   void initState() {
     _productsFuture = _fetchProducts();
     super.initState();
+  }
+
+  DateTime currentBackPressTime;
+  Future<bool> onWillPop() {
+    final DateTime now = DateTime.now();
+    if (currentBackPressTime == null ||
+        now.difference(currentBackPressTime) > const Duration(seconds: 2)) {
+      currentBackPressTime = now;
+      Fluttertoast.showToast(msg: "Press back key again to exit.");
+      return Future.value(false);
+    }
+    return Future.value(true);
   }
 
   @override
@@ -69,60 +82,63 @@ class _ManageProductScreenState extends State<ManageProductScreen> {
           ),
         ],
       ),
-      body: FutureBuilder(
-          future: _productsFuture,
-          builder: (ctx, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 8),
-                  Text("Loading products...")
-                ],
-              ));
-            } else {
-              if (snapshot.error != null) {
-                return AlertDialog(
-                  title: const Text("Error in loading products"),
-                  content: const Text("Please try again."),
-                  actions: [
-                    FlatButton(
-                      child: const Text("Exit"),
-                      onPressed: () {
-                        SystemNavigator.pop();
-                      },
-                    ),
-                    FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          _productsFuture = _fetchProducts();
-                        });
-                      },
-                      child: const Text("Retry"),
-                    )
+      body: WillPopScope(
+        child: FutureBuilder(
+            future: _productsFuture,
+            builder: (ctx, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 8),
+                    Text("Loading products...")
                   ],
-                );
-              }
-              return RefreshIndicator(
-                  onRefresh: _fetchProducts,
-                  child: Consumer<Products>(
-                    builder: (ctx, products, _) => ListView.builder(
-                      itemBuilder: (ctx, i) => Column(
-                        children: [
-                          ManageProductItem(
-                            id: products.items[i].id,
-                            imageUrl: products.items[i].imageUrl,
-                            title: products.items[i].title,
-                          ),
-                        ],
+                ));
+              } else {
+                if (snapshot.error != null) {
+                  return AlertDialog(
+                    title: const Text("Error in loading products"),
+                    content: const Text("Please try again."),
+                    actions: [
+                      FlatButton(
+                        child: const Text("Exit"),
+                        onPressed: () {
+                          SystemNavigator.pop();
+                        },
                       ),
-                      itemCount: products.items.length,
-                    ),
-                  ));
-            }
-          }),
+                      FlatButton(
+                        onPressed: () {
+                          setState(() {
+                            _productsFuture = _fetchProducts();
+                          });
+                        },
+                        child: const Text("Retry"),
+                      )
+                    ],
+                  );
+                }
+                return RefreshIndicator(
+                    onRefresh: _fetchProducts,
+                    child: Consumer<Products>(
+                      builder: (ctx, products, _) => ListView.builder(
+                        itemBuilder: (ctx, i) => Column(
+                          children: [
+                            ManageProductItem(
+                              id: products.items[i].id,
+                              imageUrl: products.items[i].imageUrl,
+                              title: products.items[i].title,
+                            ),
+                          ],
+                        ),
+                        itemCount: products.items.length,
+                      ),
+                    ));
+              }
+            }),
+        onWillPop: onWillPop,
+      ),
       drawer: MainDrawer(),
     );
   }

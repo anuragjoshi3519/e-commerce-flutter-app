@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/cart.dart';
@@ -32,109 +33,124 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
     super.initState();
   }
 
+  DateTime currentBackPressTime;
+  Future<bool> onWillPop() {
+    final DateTime now = DateTime.now();
+    if (currentBackPressTime == null ||
+        now.difference(currentBackPressTime) > const Duration(seconds: 2)) {
+      currentBackPressTime = now;
+      Fluttertoast.showToast(msg: "Press back key again to exit.");
+      return Future.value(false);
+    }
+    return Future.value(true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: MainDrawer(),
-      appBar: AppBar(
-        title: Text(_showFavorite ? "Your Favorites" : "Local Market",
-            style: Theme.of(context)
-                .textTheme
-                .headline6
-                .copyWith(color: Colors.white)),
-        actions: [
-          Consumer<Cart>(
-            builder: (ctx, cart, _) => Badge(
-              child: IconButton(
-                  onPressed: () =>
-                      Navigator.pushNamed(context, CartScreen.routeName),
-                  icon: const Icon(Icons.shopping_cart)),
-              value: cart.totalItems.toString(),
-              color: Colors.orange[300],
+        drawer: MainDrawer(),
+        appBar: AppBar(
+          title: Text(_showFavorite ? "Your Favorites" : "Local Market",
+              style: Theme.of(context)
+                  .textTheme
+                  .headline6
+                  .copyWith(color: Colors.white)),
+          actions: [
+            Consumer<Cart>(
+              builder: (ctx, cart, _) => Badge(
+                child: IconButton(
+                    onPressed: () =>
+                        Navigator.pushNamed(context, CartScreen.routeName),
+                    icon: const Icon(Icons.shopping_cart)),
+                value: cart.totalItems.toString(),
+                color: Colors.orange[300],
+              ),
             ),
-          ),
-          PopupMenuButton(
-              color: Colors.grey[50],
-              icon: const Icon(Icons.more_vert),
-              elevation: 7,
-              onSelected: (FilterOptions option) {
-                setState(() {
-                  if (option == FilterOptions.All)
-                    _showFavorite = false;
-                  else
-                    _showFavorite = true;
-                });
-              },
-              itemBuilder: (ctx) => [
-                    PopupMenuItem(
-                      child: Row(
-                        children: [
-                          Icon(Icons.all_inclusive,
-                              color: Theme.of(context).accentColor),
-                          const SizedBox(width: 7),
-                          const Text("Show All"),
-                        ],
+            PopupMenuButton(
+                color: Colors.grey[50],
+                icon: const Icon(Icons.more_vert),
+                elevation: 7,
+                onSelected: (FilterOptions option) {
+                  setState(() {
+                    if (option == FilterOptions.All)
+                      _showFavorite = false;
+                    else
+                      _showFavorite = true;
+                  });
+                },
+                itemBuilder: (ctx) => [
+                      PopupMenuItem(
+                        child: Row(
+                          children: [
+                            Icon(Icons.all_inclusive,
+                                color: Theme.of(context).accentColor),
+                            const SizedBox(width: 7),
+                            const Text("Show All"),
+                          ],
+                        ),
+                        value: FilterOptions.All,
                       ),
-                      value: FilterOptions.All,
+                      PopupMenuItem(
+                        child: Row(
+                          // ignore: prefer_const_literals_to_create_immutables
+                          children: [
+                            const Icon(Icons.favorite, color: Colors.red),
+                            const SizedBox(width: 7),
+                            const Text("Only Favorites"),
+                          ],
+                        ),
+                        value: FilterOptions.Favorites,
+                      )
+                    ])
+          ],
+        ),
+        body: WillPopScope(
+          child: FutureBuilder(
+            future: _productsFuture,
+            builder: (ctx, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    CircularProgressIndicator(),
+                    SizedBox(
+                      height: 8,
                     ),
-                    PopupMenuItem(
-                      child: Row(
-                        // ignore: prefer_const_literals_to_create_immutables
-                        children: [
-                          const Icon(Icons.favorite, color: Colors.red),
-                          const SizedBox(width: 7),
-                          const Text("Only Favorites"),
-                        ],
-                      ),
-                      value: FilterOptions.Favorites,
-                    )
-                  ])
-        ],
-      ),
-      body: FutureBuilder(
-          future: _productsFuture,
-          builder: (ctx, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  CircularProgressIndicator(),
-                  SizedBox(
-                    height: 8,
-                  ),
-                  Text("Loading products...")
-                ],
-              ));
-            } else {
-              if (snapshot.error != null) {
-                return AlertDialog(
-                  title: const Text("Error in loading products"),
-                  content: const Text("Please try again."),
-                  actions: [
-                    FlatButton(
-                      child: const Text("Exit"),
-                      onPressed: () {
-                        SystemNavigator.pop();
-                      },
-                    ),
-                    FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          _productsFuture = _loadProducts();
-                        });
-                      },
-                      child: const Text("Retry"),
-                    )
+                    Text("Loading products...")
                   ],
-                );
+                ));
+              } else {
+                if (snapshot.error != null) {
+                  return AlertDialog(
+                    title: const Text("Error in loading products"),
+                    content: const Text("Please try again."),
+                    actions: [
+                      FlatButton(
+                        child: const Text("Exit"),
+                        onPressed: () {
+                          SystemNavigator.pop();
+                        },
+                      ),
+                      FlatButton(
+                        onPressed: () {
+                          setState(() {
+                            _productsFuture = _loadProducts();
+                          });
+                        },
+                        child: const Text("Retry"),
+                      )
+                    ],
+                  );
+                }
+                return RefreshIndicator(
+                    onRefresh: _loadProducts,
+                    child: ProductsGrid(showFavs: _showFavorite));
               }
-              return RefreshIndicator(
-                  onRefresh: _loadProducts,
-                  child: ProductsGrid(showFavs: _showFavorite));
-            }
-          }),
-    );
+            },
+          ),
+          onWillPop: onWillPop,
+        ));
   }
 }
 

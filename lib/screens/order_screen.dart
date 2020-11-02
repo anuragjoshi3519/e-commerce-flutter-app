@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/order.dart' show Order;
@@ -26,21 +27,31 @@ class _OrderScreenState extends State<OrderScreen> {
     super.initState();
   }
 
+  DateTime currentBackPressTime;
+  Future<bool> onWillPop() {
+    final DateTime now = DateTime.now();
+    if (currentBackPressTime == null ||
+        now.difference(currentBackPressTime) > const Duration(seconds: 2)) {
+      currentBackPressTime = now;
+      Fluttertoast.showToast(msg: "Press back key again to exit.");
+      return Future.value(false);
+    }
+    return Future.value(true);
+  }
+
   @override
   Widget build(BuildContext context) {
     final Order orders = Provider.of<Order>(context);
-    return SafeArea(
-      child: Scaffold(
-        drawer: MainDrawer(),
-        appBar: AppBar(
-            title: Text(
-          "Your Orders",
-          style: Theme.of(context)
-              .textTheme
-              .headline6
-              .copyWith(color: Colors.white),
-        )),
-        body: FutureBuilder(
+    return Scaffold(
+      drawer: MainDrawer(),
+      appBar: AppBar(
+          title: Text(
+        "Your Orders",
+        style:
+            Theme.of(context).textTheme.headline6.copyWith(color: Colors.white),
+      )),
+      body: WillPopScope(
+        child: FutureBuilder(
           future: _orderFuture,
           builder: (ctx, orderSnapshot) {
             if (orderSnapshot.connectionState == ConnectionState.waiting) {
@@ -99,6 +110,7 @@ class _OrderScreenState extends State<OrderScreen> {
             }
           },
         ),
+        onWillPop: onWillPop,
       ),
     );
   }

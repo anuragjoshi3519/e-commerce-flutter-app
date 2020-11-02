@@ -56,7 +56,22 @@ class MyApp extends StatelessWidget {
               visualDensity: VisualDensity.adaptivePlatformDensity,
               fontFamily: 'Lato',
               textTheme: Typography.blackMountainView),
-          home: auth.isAuthenticated ? ProductsOverviewScreen() : AuthScreen(),
+          home: auth.isAuthenticated
+              ? ProductsOverviewScreen()
+              : FutureBuilder(
+                  future: auth.tryLogin(),
+                  builder: (ctx, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Scaffold(
+                        body: CircularProgressIndicator(strokeWidth: 6.0),
+                      );
+                    }
+                    if (snapshot.data == true) {
+                      return ProductsOverviewScreen();
+                    }
+                    return AuthScreen();
+                  },
+                ),
           routes: {
             ProductsOverviewScreen.routeName: (ctx) => ProductsOverviewScreen(),
             ProductDetails.routeName: (ctx) => ProductDetails(),

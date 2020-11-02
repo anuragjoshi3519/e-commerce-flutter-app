@@ -23,8 +23,8 @@ class AuthScreen extends StatelessWidget {
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Color.fromRGBO(0, 90, 90, 1),
-                  Color.fromRGBO(10, 10, 10, 1),
+                  Color.fromRGBO(0, 100, 100, 1),
+                  Color.fromRGBO(0, 30, 50, 1),
                 ],
                 begin: Alignment.topRight,
                 end: Alignment.bottomLeft,
@@ -32,40 +32,36 @@ class AuthScreen extends StatelessWidget {
               ),
             ),
           ),
+          // Container(
+          //     alignment: Alignment.topLeft,
+          //     padding: const EdgeInsets.only(left: 15.0, top: 5.0),
+          //     transform: Matrix4.rotationZ(60 * pi / 180)
+          //       ..translate(-110.0, -380.0),
+          //     decoration: const BoxDecoration(
+          //       // borderRadius: BorderRadius.circular(20),
+          //       gradient: LinearGradient(
+          //         colors: [
+          //           Color.fromRGBO(0, 50, 70, 1),
+          //           Color.fromRGBO(80, 80, 80, 1),
+          //         ],
+          //         begin: Alignment.bottomLeft,
+          //         end: Alignment.topRight,
+          //         stops: [0, 1],
+          //       ),
+          //       boxShadow: [
+          //         BoxShadow(
+          //           blurRadius: 20,
+          //           color: Colors.black,
+          //           offset: Offset(0, 2),
+          //         )
+          //       ],
+          //     )),
           Container(
-              alignment: Alignment.topLeft,
-              padding: const EdgeInsets.only(left: 15.0, top: 5.0),
-              transform: Matrix4.rotationZ(60 * pi / 180)
-                ..translate(-110.0, -380.0),
-              decoration: const BoxDecoration(
-                // borderRadius: BorderRadius.circular(20),
-                gradient: LinearGradient(
-                  colors: [
-                    Color.fromRGBO(0, 50, 70, 1),
-                    Color.fromRGBO(80, 80, 80, 1),
-                  ],
-                  begin: Alignment.bottomLeft,
-                  end: Alignment.topRight,
-                  stops: [0, 1],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    blurRadius: 20,
-                    color: Colors.black,
-                    offset: Offset(0, 2),
-                  )
-                ],
-              )),
-          Container(
-            padding: const EdgeInsets.only(top: 20.0, left: 10.0),
-            child: Text(
-              "Shopp'In\nProxy",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: deviceSize.height * 0.08,
-                fontFamily: 'Montserrat',
-                fontWeight: FontWeight.w700,
-              ),
+            padding: EdgeInsets.only(
+                top: deviceSize.height * 0.08, left: deviceSize.width * 0.36),
+            child: Image.asset(
+              'assets/images/logo.png',
+              scale: 1.5,
             ),
           ),
           Container(
@@ -183,7 +179,7 @@ class _AuthCardState extends State<AuthCard> {
     final deviceSize = MediaQuery.of(context).size;
     return Card(
       color: Colors.transparent,
-      margin: EdgeInsets.only(top: deviceSize.height * 0.09),
+      margin: EdgeInsets.only(top: deviceSize.height * 0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24.0),
       ),
@@ -390,7 +386,9 @@ class _AuthCardState extends State<AuthCard> {
                       ),
                     FlatButton(
                       child: Text(
-                        _authMode == AuthMode.Login ? 'SIGN UP' : 'LOG IN',
+                        _authMode == AuthMode.Login
+                            ? 'Not a member?  Join us now.'
+                            : 'Already a member?  Log into your account.',
                         style: const TextStyle(
                             fontFamily: "Lato",
                             fontSize: 15,

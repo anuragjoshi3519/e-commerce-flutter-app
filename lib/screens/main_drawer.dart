@@ -21,33 +21,36 @@ class MainDrawer extends StatelessWidget {
                 leading: const Padding(
                   padding: EdgeInsets.only(left: 15.0, top: 8.0, bottom: 8.0),
                   child: CircleAvatar(
-                    child: Icon(Icons.person),
+                    child: Icon(Icons.person_outlined),
                     radius: 5,
                   ),
                 ),
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Anurag Joshi",
-                        style: TextStyle(
+                    Text(Provider.of<Auth>(context, listen: false).email,
+                        style: const TextStyle(
                           fontSize: 18,
                         )),
-                    const SizedBox(height: 5),
-                    GestureDetector(
-                      onTap: null,
-                      child: const Text("Profile",
-                          style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white70)),
-                    ),
+                    // const SizedBox(height: 5),
+                    // GestureDetector(
+                    //   onTap: null,
+                    //   child: const Text("Edit profile",
+                    //       style: TextStyle(
+                    //           fontSize: 14,
+                    //           fontWeight: FontWeight.bold,
+                    //           color: Colors.white70)),
+                    // ),
                     const SizedBox(height: 3),
                   ],
                 ),
               ),
               const SizedBox(height: 10),
               ListTile(
-                leading: const Icon(Icons.shop),
+                leading: Icon(
+                  Icons.shop,
+                  color: Theme.of(context).primaryColor,
+                ),
                 title: const Text(
                   "Local Shop",
                   style: TextStyle(fontSize: 16),
@@ -58,7 +61,10 @@ class MainDrawer extends StatelessWidget {
               ),
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.shopping_cart),
+                leading: Icon(
+                  Icons.shopping_cart,
+                  color: Theme.of(context).primaryColor,
+                ),
                 title: const Text(
                   "Your Cart",
                   style: TextStyle(fontSize: 16),
@@ -69,7 +75,10 @@ class MainDrawer extends StatelessWidget {
               ),
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.payment),
+                leading: Icon(
+                  Icons.payment,
+                  color: Theme.of(context).primaryColor,
+                ),
                 title: const Text(
                   "Orders",
                   style: TextStyle(fontSize: 16),
@@ -80,7 +89,10 @@ class MainDrawer extends StatelessWidget {
               ),
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.mode_edit),
+                leading: Icon(
+                  Icons.mode_edit,
+                  color: Theme.of(context).primaryColor,
+                ),
                 title: const Text(
                   "Manage Products",
                   style: TextStyle(fontSize: 16),
@@ -93,14 +105,14 @@ class MainDrawer extends StatelessWidget {
                 },
               ),
               const Spacer(),
-              ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text(
-                  "Settings",
-                  style: TextStyle(fontSize: 15),
-                ),
-                onTap: () => null,
-              ),
+              // ListTile(
+              //   leading: const Icon(Icons.settings),
+              //   title: const Text(
+              //     "Settings",
+              //     style: TextStyle(fontSize: 15),
+              //   ),
+              //   onTap: () => null,
+              // ),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.logout),
@@ -121,8 +133,8 @@ class MainDrawer extends StatelessWidget {
                         FlatButton(
                           onPressed: () {
                             Navigator.of(context).pop();
-                            Navigator.of(context).pushReplacementNamed('/');
                             Provider.of<Auth>(context, listen: false).logout();
+                            Navigator.of(context).pushReplacementNamed('/');
                           },
                           child: const Text("YES"),
                         ),
