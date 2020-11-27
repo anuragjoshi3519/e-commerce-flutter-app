@@ -83,7 +83,8 @@ class AuthCard extends StatefulWidget {
   _AuthCardState createState() => _AuthCardState();
 }
 
-class _AuthCardState extends State<AuthCard> {
+class _AuthCardState extends State<AuthCard>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey();
   AuthMode _authMode = AuthMode.Login;
   final Map<String, String> _authData = {
@@ -93,6 +94,23 @@ class _AuthCardState extends State<AuthCard> {
   var _isLoading = false;
   var _showPassword = false;
   final _passwordController = TextEditingController();
+  AnimationController _animationController;
+  Animation<Offset> _slideAnimation;
+  Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    _animationController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 300));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.15), end: const Offset(0, 0))
+            .animate(CurvedAnimation(
+                parent: _animationController, curve: Curves.easeIn));
+    _opacityAnimation = Tween<double>(begin: 1, end: 0).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeIn));
+    // _slideAnimation.addListener(() => setState(() {}));
+    super.initState();
+  }
 
   void showDialogBox(String title, String content) {
     showDialog(
@@ -166,10 +184,12 @@ class _AuthCardState extends State<AuthCard> {
       setState(() {
         _authMode = AuthMode.Signup;
       });
+      // _animationController.forward();
     } else {
       setState(() {
         _authMode = AuthMode.Login;
       });
+      // _animationController.reverse();
     }
   }
 
@@ -183,11 +203,15 @@ class _AuthCardState extends State<AuthCard> {
         borderRadius: BorderRadius.circular(24.0),
       ),
       elevation: 0.0,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeIn,
         alignment: Alignment.center,
         height: _authMode == AuthMode.Signup ? 470 : 400,
         constraints:
             BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 450 : 390),
+        // height: _cardAnimation.value.height,
+        // constraints: BoxConstraints(minHeight: _cardAnimation.value.height),
         width: deviceSize.width * 0.96,
         padding: const EdgeInsets.all(20.0),
         child: SingleChildScrollView(
@@ -303,46 +327,65 @@ class _AuthCardState extends State<AuthCard> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    if (_authMode == AuthMode.Signup)
-                      TextFormField(
-                        style: const TextStyle(
-                          fontFamily: "Lato",
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeIn,
+                      height: _authMode == AuthMode.Signup ? 70 : 0,
+                      child: FadeTransition(
+                        opacity: _opacityAnimation,
+                        child: SlideTransition(
+                          position: _slideAnimation,
+                          child: _authMode == AuthMode.Signup
+                              ? TextFormField(
+                                  style: const TextStyle(
+                                    fontFamily: "Lato",
+                                  ),
+                                  enabled: _authMode == AuthMode.Signup,
+                                  decoration: const InputDecoration(
+                                    prefixIcon: Icon(
+                                      Icons.lock,
+                                    ),
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.never,
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.white,
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(16.0),
+                                      ),
+                                    ),
+                                    labelStyle: TextStyle(
+                                        fontFamily: "Lato", color: Colors.grey),
+                                    helperStyle: TextStyle(
+                                        fontFamily: "Lato",
+                                        color: Colors.black),
+                                    labelText: 'Confirm Password',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(16.0),
+                                      ),
+                                    ),
+                                  ),
+                                  obscureText: true,
+                                  validator: _authMode == AuthMode.Signup
+                                      ? (value) {
+                                          if (value !=
+                                              _passwordController.text) {
+                                            return 'Passwords do not match!';
+                                          }
+                                          return null;
+                                        }
+                                      : null,
+                                )
+                              : const SizedBox(
+                                  height: 0,
+                                ),
                         ),
-                        enabled: _authMode == AuthMode.Signup,
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.lock),
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          filled: true,
-                          fillColor: Colors.white,
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.white,
-                            ),
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(16.0),
-                            ),
-                          ),
-                          labelStyle:
-                              TextStyle(fontFamily: "Lato", color: Colors.grey),
-                          helperStyle: TextStyle(
-                              fontFamily: "Lato", color: Colors.black),
-                          labelText: 'Confirm Password',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(16.0),
-                            ),
-                          ),
-                        ),
-                        obscureText: true,
-                        validator: _authMode == AuthMode.Signup
-                            ? (value) {
-                                if (value != _passwordController.text) {
-                                  return 'Passwords do not match!';
-                                }
-                                return null;
-                              }
-                            : null,
                       ),
+                    ),
                     const SizedBox(
                       height: 20,
                     ),
