@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_config/flutter_config.dart';
+import 'package:provider/provider.dart';
 
 import './providers/auth.dart';
 import './providers/cart.dart';
@@ -13,6 +13,7 @@ import './screens/edit_product.dart';
 import './screens/manage_product_screen.dart';
 import './screens/order_screen.dart';
 import './screens/product_overview_screen.dart';
+import 'helpers/custom_page_transition.dart';
 import 'screens/product_detail_screen.dart';
 
 Future<void> main() async {
@@ -55,7 +56,11 @@ class MyApp extends StatelessWidget {
               accentColor: Colors.blueGrey,
               visualDensity: VisualDensity.adaptivePlatformDensity,
               fontFamily: 'Lato',
-              textTheme: Typography.blackMountainView),
+              textTheme: Typography.blackMountainView,
+              pageTransitionsTheme: PageTransitionsTheme(builders: {
+                TargetPlatform.android: CustomPageTransitionBuilder(),
+                TargetPlatform.iOS: CustomPageTransitionBuilder(),
+              })),
           home: auth.isAuthenticated
               ? ProductsOverviewScreen()
               : FutureBuilder(

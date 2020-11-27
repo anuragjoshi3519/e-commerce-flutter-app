@@ -11,7 +11,6 @@ class OrderItem extends StatefulWidget {
   });
   final ord.OrderItem order;
 
-
   @override
   _OrderItemState createState() => _OrderItemState();
 }
@@ -27,8 +26,8 @@ class _OrderItemState extends State<OrderItem> {
             padding: const EdgeInsets.all(5.0),
             child: ListTile(
               isThreeLine: true,
-              leading:
-                  const Icon(Icons.shopping_basket, size: 32, color: Colors.teal),
+              leading: const Icon(Icons.shopping_basket,
+                  size: 32, color: Colors.teal),
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -60,7 +59,9 @@ class _OrderItemState extends State<OrderItem> {
                 ),
               ),
               trailing: IconButton(
-                  icon: Icon(!_expandTile?Icons.expand_more:Icons.expand_less, size: 32),
+                  icon: Icon(
+                      !_expandTile ? Icons.expand_more : Icons.expand_less,
+                      size: 32),
                   onPressed: () {
                     setState(() {
                       _expandTile = !_expandTile;
@@ -69,31 +70,35 @@ class _OrderItemState extends State<OrderItem> {
             ),
           ),
         ),
-        if (_expandTile)
-          Container(
-            height: min(250.0, widget.order.items.length * 40 + 5.0),
-            child: ListView(
-                children: widget.order.items
-                    .map(
-                      (e) => Container(
-                        padding: const EdgeInsets.symmetric(horizontal:15,vertical:8),
-                        child: Row(
-                          children: [
-                            Text(
-                              e.title,
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Spacer(),
-                            Text(
-                              "\$${e.price} x${e.quantity}",
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.ease,
+          height: _expandTile
+              ? min(250.0, widget.order.items.length * 40 + 5.0)
+              : 0,
+          child: ListView(
+              children: widget.order.items
+                  .map(
+                    (e) => Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 8),
+                      child: Row(
+                        children: [
+                          Text(
+                            e.title,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const Spacer(),
+                          Text(
+                            "\$${e.price} x${e.quantity}",
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ],
                       ),
-                    )
-                    .toList()),
-          ),
+                    ),
+                  )
+                  .toList()),
+        ),
       ],
     );
   }

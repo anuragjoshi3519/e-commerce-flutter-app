@@ -17,9 +17,16 @@ class ProductItem extends StatelessWidget {
         onTap: () => Navigator.pushNamed(context, ProductDetails.routeName,
             arguments: product.id),
         child: GridTile(
-          child: Image.network(
-            product.imageUrl,
-            fit: BoxFit.contain,
+          child: Hero(
+            tag: product.id,
+            child: FadeInImage(
+              placeholder: const AssetImage(
+                  'assets/images/product-placeholder.jpg'),
+              image: NetworkImage(
+                product.imageUrl,
+              ),
+              fit: BoxFit.cover,
+            ),
           ),
           footer: Container(
             padding:
@@ -67,8 +74,9 @@ class ProductItem extends StatelessWidget {
                 ),
                 onPressed: () async {
                   try {
-                    await product
-                        .toggleFavorite(Provider.of<Auth>(context,listen: false).token,Provider.of<Auth>(context,listen: false).userId);
+                    await product.toggleFavorite(
+                        Provider.of<Auth>(context, listen: false).token,
+                        Provider.of<Auth>(context, listen: false).userId);
                   } catch (error) {
                     scaffold.showSnackBar(
                       SnackBar(

@@ -37,8 +37,10 @@ class ProductDetails extends StatelessWidget {
                       width: double.infinity,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child:
-                            Image.network(product.imageUrl, fit: BoxFit.cover),
+                        child: Hero(
+                            tag: id,
+                            child: Image.network(product.imageUrl,
+                                fit: BoxFit.cover)),
                       ),
                     ),
                     Card(
